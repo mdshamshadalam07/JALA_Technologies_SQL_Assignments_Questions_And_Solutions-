@@ -1,0 +1,227 @@
+                                      SQL-Assignments-Questions-And-Solutions
+                                    ===========================================
+                                                              
+1. Obtain all orders for the customer named Cisnerous. (Assume you don't know his customer no. (cnum))?
+Ans :- SELECT onum "ALL ORDERS", cnum FROM orders WHERE cnum = (SELECT cnum FROM customers WHERE cname='cisneros'); 
+							                                                                           
+--------------------------------------------------------------------------------------------------------------------------------
+
+2. Produce the names and rating of all customers who have above average orders.
+Ans :- SELECT cname, rating FROM customers WHERE cnum IN (SELECT cnum FROM orders WHERE amt>(SELECT avg(amt)  FROM orders));
+                                                                                                                                                   
+---------------------------------------------------------------------------------------------------------------------------------
+
+3. Write a simple division program 15/0 and giving a result of "rest of code" instead of getting infinity of numbers.
+Ans :- 
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+4. Find total amount in orders for each salesperson for whom this total is greater than the amount 
+    of the largest order in the table.
+Ans :- SELECT sum(amt) FROM orders GROUP BY snum HAVING sum(amt)> (SELECT max(amt) FROM orders);
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+5. Find all customers with order on 3rd Oct.
+Ans :- select * from orders where odate='1996-03-10'; 
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+6. Find names and numbers of all salesperson who have more than one customer.
+Ans :- select a.snum,b.sname,count(*) as cust_count from customer a, salespeople b  where a.snum=b.snum group by a.snum;
+                                                                                                                                    
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+7. Check if the correct salesperson was credited with each sale.
+Ans :- Select onum, a.cnum, a.snum, b.snum from orders a, cust b where a.cnum = b.cnum and a.snum != b.snum;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+8. Find all orders with above average amounts for their customers.
+Ans :- select onum, cnum, amt from orders a where amt >(select avg(amt) from orders b where a.cnum = b.cnum group by cnum);
+ 
+----------------------------------------------------------------------------------------------------------------------------------------------------------- 
+ 
+9. Find the sums of the amounts from order table grouped by date, eliminating all those dates where the sum was 
+   not at least 2000 above the maximum amount.
+Ans :- Select odate, sum(amt) from orders a group by odate having sum(amt)>( select max(amt) from orders b where a.odate = b.odate group by odate);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+10. Find names and numbers of all customers with ratings equal to the maximum for their city.
+Ans :- Select a.cnum, a.cname from cust a where a.rating = (select max(rating) from cust b where a.city = b.city);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+11. Find all salespeople who have customers in their cities who they don't service. ( Both way using Join and Correlated subquery.)
+Ans :- Select distinct cname from cust a, salespeople b where a.city = b.city and a.snum != b.snum;
+
+      Select cname from cust where cname in (select cname from cust a, salespeople  where a.city = b.city and a.snum != b.snum );
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------      
+
+12. Extract cnum,cname and city from customer table if and only if one or more of the customers in the table are located in San Jose.
+Ans :- Select * from cust where 2 < (select count(*) from cust where city = 'San Jose');
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+13. Find salespeople no. who have multiple customers.
+Ans:- Select snum from cust group by snum having count(*) > 1;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+14. Find salespeople number, name and city who have multiple customers.
+Ans :- Select snum, sname, city from salespeople where snum in (select snum from cust group by snum having count(*) > 1);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+15. Find salespeople who serve only one customer.
+Ans :- Select snum from cust group by snum having count(*) = 1;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+16. Extract rows of all salespeople with more than one current order.
+Ans :- Select snum, count(snum) from orders group by snum having count(snum) > 1;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+17. Find all salespeople who have customers with a rating of 300. (use EXISTS).
+Ans :- Select a.snum from salespeople a where exists ( select b.snum from cust b where b.rating = 300 and a.snum = b.snum)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+18. Find all salespeople who have customers with a rating of 300. (use Join).
+Ans :- Select a.snum from salespeople a, cust b where b.rating = 300 and a.snum = b.snum;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+19. Select all salespeople with customers located in their cities who are not assigned to them. (use EXISTS).
+Ans :- Select snum, sname from salespeople where exists ( select cnum from cust where salespeople.city = cust.city and salespeople.snum != cust.snum);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+20. Extract from customers table every customer assigned the a salesperson who currently has at least one other customer 
+   ( besides the customer being selected) with orders in order table. 
+    
+Ans :- Select a.cnum, max(c.cname) from orders a, cust c where a.cnum = c.cnum group by a.cnum,a.snum having count(*) < 
+      (select count(*) from orders b where a.snum = b.snorder by a.cnum;   
+   
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+   
+21. Find salespeople with customers located in their cities ( using both ANY and IN).
+Ans :- Select sname from salespeople where snum in ( select snum from cust where salespeople.city = cust.city and salespeople.snum = cust.snum);
+    
+       Select sname from salespeople where snum = any ( select snum from cust where salespeople.city = cust.city and salespeople.snum = cust.snum);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+22. Find all salespeople for whom there are customers that follow them in alphabetical order. (Using ANY and EXISTS).
+Ans :- Select sname from salespeople where sname < any ( select cname from cust where salespeople.snum = cust.snum);
+
+       Select sname from salespeople where exists ( select cname from cust where salespeople.snum = cust.snum and salespeople.sname < cust.cname);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+24. Select customers who have a greater rating than any customer in rome.
+Ans :- Select a.cname from cust a where city = 'Rome' and rating > ( select max(rating) from cust where city != 'Rome');
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+25. Select all orders that had amounts that were greater that atleast one of the orders from Oct 6th.
+Ans :- Select onum, amt from orders where odate != '06-oct-94' and amt > ( select min(amt) from orders where odate = '06-oct-94');
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+26. Find all orders with amounts smaller than any amount for a customer in San Jose. (Both using ANY and without ANY)
+Ans :- Select onum, amt from orders where amt < any ( select amt from orders, cust where city = 'San Jose' and orders.cnum = cust.cnum);
+  
+       Select onum, amt from orders where amt < ( select max(amt) from orders, cust where city = 'San Jose' and orders.cnum = cust.cnum);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+27. Select those customers whose ratings are higher than every customer in Paris. ( Using both ALL and NOT EXISTS).
+Ans :- Select * from cust where rating > any (select rating from cust where city = 'Paris');
+       
+       Select * from cust a where not exists ( select b.rating from cust b where b.city != 'Paris' and b.rating > a.rating);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+28. Select all customers whose ratings are equal to or greater than ANY of the Seeres.
+Ans :- Select cname, sname from cust, salespeople where rating >= any ( select rating from cust where snum = (select snum
+       from salespeople where sname = 'Serres')) and sname != 'Serres' and salespeople.snum(+) = cust.snum;
+         
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+        
+29. Find all salespeople who have no customers located in their city. ( Both using ANY and ALL)   
+Ans :- Select sname from salespeople where snum in ( select snum from cust where salespeople.city != cust.city and salespeople.snum = cust.snum);
+       
+       Select sname from salespeople where snum = any ( select snum from cust where salespeople.city != cust.city and salespeople.snum = cust.snum);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+30. Find all orders for amounts greater than any for the customers in London.
+Ans :-Select onum, amt from orders where amt > any ( select amt from orders, cust where city = ‘London’ and orders.cnum = cust.cnum);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+31. Find all salespeople and customers located in london.
+Ans :- Select sname, cname from cust, salespeople where cust.city = 'London' and salespeople.city = 'London' and cust.snum = salespeople.snum;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+32. For every salesperson, dates on which highest and lowest orders were brought.
+Ans :- Select a.amt, a.odate, b.amt, b.odate from orders a, orders b where (a.amt, b.amt) in (select max(amt), min(amt) from orders group by snum);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+33. List all of the salespeople and indicate those who don't have customers in their cities as well as those who do have.
+
+Ans :- Select snum, city, 'Customer Present' from salespeople a where exists ( select snum from cust where a.snum = cust.snum and a.city = cust.city) 
+              UNION select snum, city, 'Customer Not Present' from salespeople a where exists ( select snum from cust c
+              where a.snum = c.snum and a.city != c.city and c.snum not in ( select snum from cust where a.snum = cust.snum and a.city = cust.city));
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+34. Append strings to the selected fields, indicating weather or not a given salesperson was matched to a customer in his city.
+Ans :-Select a.cname, decode(a.city,b.city,'Matched','Not Matched') from cust a, salespeople b where a.snum = b.snum;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+35. Create a union of two queries that shows the names, cities and ratings of all customers. Those with a rating of 200 or greater will also have the words 
+    'High Rating', while the others will have the words 'Low Rating'.
+    
+Ans :- Select cname, cities, rating, ‘Higher Rating’ from cust where rating >= 200 UNION Select cname, cities, rating, ‘Lower Rating’from cust where rating < 200;
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+36. Write command that produces the name and number of each salesperson and each customer with more than one current order. Put the result in alphabetical order.
+Ans :- Select 'Customer Number ' || cnum "Code ",count(*) from orders group by cnum having count(*) > 1
+                        UNION select 'Salesperson Number '||snum,count(*) from orders group by snum having count(*) > 1;
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+37. Form a union of three queries. Have the first select the snums of all salespeople in San Jose, then second the cnums of all customers in San Jose and the third the
+    onums of all orders on Oct. 3. Retain duplicates between the last two queries, but eliminates and redundancies between either of them and the first.
+
+Ans :- Select 'Customer Number ' || cnum "Code " from cust where city = 'San Jose' UNION select 'Salesperson Number '||snum
+        from salespeople where city = 'San Jose' UNION ALL select 'Order Number '|| onum from Orders where odate = '03-OCT-94';
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+38. Produce all the salesperson in London who had at least one customer there.
+Ans :- Select snum, sname from salespeople where snum in ( select snum from cust where cust.snum = 
+                                                                 salespeople.snum and cust.city = 'London') and city = ‘London’;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+39. Produce all the salesperson in London who did not have customers there.
+Ans :- Select snum, sname from salespeople where snum in ( select snum from cust where cust.snum = salespeople.snum and cust.city = 'London') and city = 'London';
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+40. We want to see salespeople matched to their customers without excluding those salesperson who were not currently assigned to any customers. (User OUTER join and UNION)   
+Ans :- Select sname, cname from cust, salespeople where cust.snum(+) = salespeople.snum; Select sname, cname from cust, salespeople where cust.snum = salespeople.snum
+       UNION select distinct sname, 'No Customer' from cust, salespeople where 0 = (select count(*) from cust where cust.snum = salespeople.snum);
+       
+     -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
